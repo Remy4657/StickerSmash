@@ -8,7 +8,7 @@ const WelcomePage = () => {
   const router = useRouter();
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ flex: 1, backgroundColor: "#ffff" }}>
+      <View style={{ flex: 1, backgroundColor: "#ffff", maxWidth: "auto" }}>
         <Text style={{ fontSize: 30 }}>Hello, welcome!</Text>
         <View
           style={{
