@@ -1,3 +1,4 @@
+import axios from "@/instance/axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
@@ -9,6 +10,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Toast } from "react-native-toast-notifications";
+
 import * as zod from "zod";
 
 const authSchema = zod.object({
@@ -34,17 +37,22 @@ export default function Auth() {
   });
 
   const signIn = async (data: zod.infer<typeof authSchema>) => {
-    // const { error } = await supabase.auth.signInWithPassword(data);
-    // if (error) {
-    //   alert(error.message);
-    // } else {
-    //   Toast.show("Signed in successfully", {
-    //     type: "success",
-    //     placement: "top",
-    //     duration: 1500,
-    //   });
-    // }
+    const res = await axios.post("http://localhost:8080/api/v1/user/login", {
+      username: data.email,
+      password: data.password,
+    });
+
+    if (!res) {
+      alert("error");
+    } else {
+      Toast.show("Signed in successfully", {
+        type: "success",
+        placement: "top",
+        duration: 1500,
+      });
+    }
     router.navigate("/(tabs)/explore");
+    console.log(data);
   };
 
   const signUp = async (data: zod.infer<typeof authSchema>) => {

@@ -8,10 +8,10 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 
-import { getProductsAndCategories } from "../../api/api";
+import { useGetProductsAndCategories } from "../../api/api";
 
 export default function TabTwoScreen() {
-  const { data, error, isLoading } = getProductsAndCategories();
+  const { data, error, isLoading } = useGetProductsAndCategories();
 
   if (isLoading) return <ActivityIndicator />;
 
