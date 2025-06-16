@@ -30,8 +30,8 @@ export default function AuthProvider({ children }: PropsWithChildren) {
   const [isLoading, setIsLoading] = useState(false);
 
   const { data, error } = useGetMe();
-  console.log("data: ", data);
-  console.log("error: ", error);
+  // console.log("data: ", data);
+  // console.log("error: ", error);
   // const { data, error } = useGetProductsAndCategories();
 
   useEffect(() => {}, []);

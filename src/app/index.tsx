@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import {
   ImageBackground,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -37,22 +38,29 @@ export default function Auth() {
   });
 
   const signIn = async (data: zod.infer<typeof authSchema>) => {
-    const res = await axios.post("http://localhost:8080/api/v1/user/login", {
-      username: data.email,
-      password: data.password,
-    });
-
-    if (!res) {
-      alert("error");
-    } else {
-      Toast.show("Signed in successfully", {
-        type: "success",
-        placement: "top",
-        duration: 1500,
-      });
+    try {
+      const findPlatform = Platform.OS === "android" ? "10.0.2.2" : "localhost";
+      const res = await axios.post(
+        `http://192.168.30.107:8080/api/v1/user/login`,
+        {
+          username: data.email,
+          password: data.password,
+        }
+      );
+      console.log("res: ", res);
+      if (!res) {
+        alert("error");
+      } else {
+        Toast.show("Signed in successfully", {
+          type: "success",
+          placement: "top",
+          duration: 1500,
+        });
+      }
+      router.navigate("/(tabs)");
+    } catch (error) {
+      console.log("error: ", error);
     }
-    router.navigate("/(tabs)/explore");
-    console.log(data);
   };
 
   const signUp = async (data: zod.infer<typeof authSchema>) => {
