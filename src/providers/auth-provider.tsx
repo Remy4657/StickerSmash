@@ -1,4 +1,3 @@
-import { useGetMe } from "@/api/api";
 import {
   createContext,
   PropsWithChildren,
@@ -7,37 +6,48 @@ import {
   useState,
 } from "react";
 
+/**import component */
+import { getMe } from "@/api/api";
+
 type AuthData = {
-  user: any;
+  userData: any;
   isLoading: boolean;
 };
 
 const AuthContext = createContext<AuthData>({
-  user: null,
+  userData: null,
   isLoading: false,
 });
 
 export default function AuthProvider({ children }: PropsWithChildren) {
-  const [user, setUser] = useState<{
-    avatar_url: string;
-    created_at: string | null;
+  const [userData, setUserData] = useState<{
+    username: string;
     email: string;
-    expo_notification_token: string | null;
-    id: string;
-    stripe_customer_id: string | null;
-    type: string | null;
+    role: string | null;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { data, error } = useGetMe();
+  //const { data, error } = useGetMe();
   // console.log("data: ", data);
   // console.log("error: ", error);
   // const { data, error } = useGetProductsAndCategories();
+  const handleGetMe = async () => {
+    const res = await getMe();
+    //setUserData({...userData, res.data.DT.payload.userRole.email})
+    console.log("res me: ", res.data);
+    console.log("email: ", res.data?.DT?.payload?.userRole?.email);
+  };
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    try {
+      handleGetMe();
+    } catch (error) {
+      console.log("error: ", error);
+    }
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading }}>
+    <AuthContext.Provider value={{ userData, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

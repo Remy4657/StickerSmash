@@ -11,21 +11,21 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useGetProductsAndCategories } from "../../api/api";
 
 export default function TabTwoScreen() {
-  const { data, error, isLoading } = useGetProductsAndCategories();
+  // const { data, error, isLoading } = useGetProductsAndCategories();
 
-  if (isLoading) return <ActivityIndicator />;
+  // if (isLoading) return <ActivityIndicator />;
 
-  if (error || !data)
-    return <Text>Error {error?.message || "An error occured"}</Text>;
+  // if (error || !data)
+  //   return <Text>Error {error?.message || "An error occured"}</Text>;
 
-  console.log("data: ", data);
+  // console.log("data: ", data);
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
       headerImage={
         <IconSymbol
           size={310}
-          color="#808080"
+          color="#fff"
           name="chevron.left.forwardslash.chevron.right"
           style={styles.headerImage}
         />

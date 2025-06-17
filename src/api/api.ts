@@ -1,6 +1,8 @@
+import axios from "@/instance/axios";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-import axios from "@/instance/axios";
+/** import component */
+import { ResponseAPI } from "@/types/api";
 
 const fetchProducts = async () => {
   const res = await axios.get(
@@ -13,12 +15,21 @@ const fetchMe = async () => {
   return res.data;
 };
 type LoginData = {
-  email: string;
+  username: string;
   password: string;
 };
-const login = async (data: LoginData) => {
-  const res = await axios.post("http://localhost:8080/api/v1/user/login", data);
-  return res?.data;
+export const login = async (data: LoginData) => {
+  const res = await axios.post<ResponseAPI>(
+    `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/user/login`,
+    data
+  );
+  return res;
+};
+export const getMe = async () => {
+  const res = await axios.get(
+    `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/refresh`
+  );
+  return res;
 };
 export const useLogin = (data: LoginData) => {
   return useMutation({

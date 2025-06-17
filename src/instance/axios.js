@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "http://localhost:8081",
+  baseURL: "http://192.168.30.107:8080",
 });
 
 instance.defaults.withCredentials = true; // use to set value of cookie
@@ -39,7 +39,14 @@ instance.interceptors.response.use(
     const status = error?.response?.status || 500;
     //const status = 500
     // we can handle global errors here
-    return Promise.reject(error);
+    console.log("status: ", status);
+    switch (status) {
+      case 401:
+        return error?.response;
+
+      default:
+        return Promise.reject(error);
+    }
   }
 );
 export default instance;

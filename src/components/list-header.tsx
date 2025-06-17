@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+/**import component */
+import { useAuth } from "@/providers/auth-provider";
 
 //import { useCartStore } from '../store/cart-store';
 
@@ -18,6 +20,8 @@ export const ListHeader = () => {
   // const handleSignOut = async () => {
   //   await supabase.auth.signOut();
   // };
+  const { userData } = useAuth();
+  console.log("user data: ", userData);
 
   return (
     <View style={[styles.headerContainer]}>

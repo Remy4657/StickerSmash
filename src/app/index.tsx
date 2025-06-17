@@ -1,20 +1,19 @@
-import axios from "@/instance/axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import {
   ImageBackground,
-  Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import { Toast } from "react-native-toast-notifications";
-
 import * as zod from "zod";
 
+/**import component */
+import { login } from "@/api/api";
+import { Toast } from "react-native-toast-notifications";
 const authSchema = zod.object({
   email: zod.string().email({ message: "Invalid email address" }),
   password: zod
@@ -39,25 +38,28 @@ export default function Auth() {
 
   const signIn = async (data: zod.infer<typeof authSchema>) => {
     try {
-      const findPlatform = Platform.OS === "android" ? "10.0.2.2" : "localhost";
-      const res = await axios.post(
-        `http://192.168.30.107:8080/api/v1/user/login`,
-        {
-          username: data.email,
-          password: data.password,
-        }
-      );
+      console.log(process.env.EXPO_PUBLIC_BASE_URL);
+      const res = await login({
+        username: data.email,
+        password: data.password,
+      });
+      // const findPlatform = Platform.OS === "android" ? "10.0.2.2" : "localhost";
+
       console.log("res: ", res);
-      if (!res) {
-        alert("error");
+      if (res.EC == 0) {
+        Toast.show("Invalid username or password", {
+          type: "error",
+          placement: "top",
+          duration: 1500,
+        });
       } else {
         Toast.show("Signed in successfully", {
           type: "success",
           placement: "top",
           duration: 1500,
         });
+        router.navigate("/(tabs)");
       }
-      router.navigate("/(tabs)");
     } catch (error) {
       console.log("error: ", error);
     }
