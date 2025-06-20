@@ -13,6 +13,7 @@ import { ToastProvider } from "react-native-toast-notifications";
 
 import AuthProvider from "@/providers/auth-provider";
 import QueryProvider from "@/providers/query-provider";
+import { Text, View } from "react-native";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -26,7 +27,26 @@ export default function RootLayout() {
   }
 
   return (
-    <ToastProvider>
+    <ToastProvider
+      placement="top"
+      duration={15000}
+      renderType={{
+        error: (toast) => (
+          <View
+            style={{
+              backgroundColor: "red",
+              padding: 16,
+              borderRadius: 8,
+              marginTop: 10,
+            }}
+          >
+            <Text style={{ color: "white", fontSize: 16 }}>
+              {toast.message}
+            </Text>
+          </View>
+        ),
+      }}
+    >
       <QueryProvider>
         <AuthProvider>
           <ThemeProvider

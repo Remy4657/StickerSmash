@@ -32,18 +32,18 @@ export default function AuthProvider({ children }: PropsWithChildren) {
   // console.log("error: ", error);
   // const { data, error } = useGetProductsAndCategories();
   const handleGetMe = async () => {
-    const res = await getMe();
-    //setUserData({...userData, res.data.DT.payload.userRole.email})
-    console.log("res me: ", res.data);
-    console.log("email: ", res.data?.DT?.payload?.userRole?.email);
-  };
-
-  useEffect(() => {
     try {
-      handleGetMe();
+      const res = await getMe();
+      console.log("res me: ", res.data);
+      console.log("email: ", res.data?.DT?.payload?.userRole?.email);
     } catch (error) {
       console.log("error: ", error);
     }
+    //setUserData({...userData, res.data.DT.payload.userRole.email})
+  };
+
+  useEffect(() => {
+    handleGetMe();
   }, []);
 
   return (

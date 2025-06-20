@@ -49,14 +49,10 @@ export default function Auth() {
       if (res.EC == 0) {
         Toast.show("Invalid username or password", {
           type: "error",
-          placement: "top",
-          duration: 1500,
         });
       } else {
         Toast.show("Signed in successfully", {
           type: "success",
-          placement: "top",
-          duration: 1500,
         });
         router.navigate("/(tabs)");
       }
