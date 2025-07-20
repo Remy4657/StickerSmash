@@ -1,54 +1,44 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
-import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import "react-native-reanimated";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import NetInfo from "@react-native-community/netinfo";
+import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
+import { onlineManager, QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import React, { useEffect, useState } from "react";
+import ExercisesPage from "./ExercisesPage";
+import OfflineBanner from "./OfflineBanner";
 
-import { useColorScheme } from "@/hooks/useColorScheme";
-import { ToastProvider } from "react-native-toast-notifications";
+const queryClient = new QueryClient();
 
-import AuthProvider from "@/providers/auth-provider";
-import QueryProvider from "@/providers/query-provider";
+const persister = createAsyncStoragePersister({
+  storage: AsyncStorage,
+  throttleTime: 3000,
+});
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-  });
+const App = () => {
+  const [isOnline, setIsOnline] = useState(true);
 
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
-  }
+  useEffect(() => {
+    return NetInfo.addEventListener((state) => {
+      const status = !!state.isConnected;
+      setIsOnline(status);
+      onlineManager.setOnline(status);
+    });
+  }, []);
 
   return (
-    <ToastProvider>
-      <QueryProvider>
-        <AuthProvider>
-          <ThemeProvider
-            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-          >
-            <Stack>
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen
-                name="(auths)/login/index"
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="(auths)/signup/index"
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-            <StatusBar style="auto" />
-          </ThemeProvider>
-        </AuthProvider>
-      </QueryProvider>
-    </ToastProvider>
+    <PersistQueryClientProvider
+      persistOptions={{ persister }}
+      onSuccess={() =>
+        queryClient
+          .resumePausedMutations()
+          .then(() => queryClient.invalidateQueries())
+      }
+      client={queryClient}
+    >
+      {!isOnline && <OfflineBanner />}
+      <ExercisesPage />
+    </PersistQueryClientProvider>
   );
-}
+};
+
+export default App;
