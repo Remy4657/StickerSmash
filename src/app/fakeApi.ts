@@ -42,43 +42,52 @@ let exercises: IExercise[] = [
 ];
 
 export const fakeApi = {
-  getTodos: async () =>
-    new Promise<IExercise[]>((resolve) => {
-      setTimeout(async () => {
-        const res = await axios.get("http://localhost:3000/api/todos");
-        console.log("res: ", res.data);
-        resolve(res.data);
-      }, 300);
-    }),
+  // Lấy tất cả bài tập
+  getTodos: async (): Promise<IExercise[]> => {
+    try {
+      const res = await axios.get("http://localhost:3000/api/todos");
+      console.log("res: ", res.data);
+      return res.data; // Trả về dữ liệu bài tập
+    } catch (error) {
+      console.error("Error fetching todos:", error);
+      throw error; // Ném lỗi nếu không lấy được dữ liệu
+    }
+  },
+  addTodos: async (
+    newExerciseTitle: string,
+    isDone: boolean
+  ): Promise<IExercise[]> => {
+    try {
+      const res = await axios.post("http://localhost:3000/api/todos", {
+        title: newExerciseTitle,
+        isDone,
+      });
+      console.log("res add: ", res);
+      return res?.data; // Trả về dữ liệu bài tập
+    } catch (error) {
+      console.error("Error fetching todos:", error);
+      throw error; // Ném lỗi nếu không lấy được dữ liệu
+    }
+  },
 
-  updateExerciseStatus: (_id: string, title: string, isDone: boolean) =>
-    new Promise<any>((resolve) => {
-      setTimeout(async () => {
-        console.log("_id: ", _id);
-
-        const res = await axios.put(`http://localhost:3000/api/todos/${_id}`, {
-          title: title,
-          isDone: isDone,
-        });
-        console.log("res: ", res.data);
-        console.log("title: ", title);
-        const exerciseToUpdate = exercises.find((t) => t._id == 2);
-
-        if (exerciseToUpdate) {
-          const updatedExercise = {
-            ...exerciseToUpdate,
-            isDone,
-          };
-
-          exercises = exercises.map((exercise) => {
-            if (exercise._id === _id) {
-              return updatedExercise;
-            }
-            return exercise;
-          });
-          console.log("updatedExercise: ", updatedExercise);
-        }
-        resolve(res);
-      }, 300);
-    }),
+  // Cập nhật trạng thái bài tập
+  updateExerciseStatus: async (
+    _id: string,
+    title: string,
+    isDone: boolean
+  ): Promise<any> => {
+    try {
+      const res = await axios.put(`http://localhost:3000/api/todos/${_id}`, {
+        title: title,
+        isDone: isDone,
+      });
+      console.log("_id: ", _id);
+      console.log("res: ", res);
+      console.log("title: ", title);
+      return res; // Trả về dữ liệu đã được cập nhật từ API
+    } catch (error) {
+      console.error("Error updating exercise status:", error);
+      throw error; // Ném lỗi nếu không cập nhật được
+    }
+  },
 };
