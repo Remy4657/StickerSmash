@@ -1,5 +1,5 @@
 import { FontAwesome } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import {
   FlatList,
   Image,
@@ -17,11 +17,16 @@ import { useAuth } from "@/providers/auth-provider";
 export const ListHeader = () => {
   // const { getItemCount } = useCartStore();
 
-  // const handleSignOut = async () => {
-  //   await supabase.auth.signOut();
-  // };
-  const { userData } = useAuth();
-  console.log("user data: ", userData);
+  const router = useRouter();
+  const { userData, logOut } = useAuth();
+  console.log("user data header: ", userData);
+
+  const handleLogout = () => {
+    logOut();
+    router.replace({
+      pathname: "/",
+    });
+  };
 
   return (
     <View style={[styles.headerContainer]}>
@@ -32,7 +37,7 @@ export const ListHeader = () => {
               source={require("@/assets/images/react-logo.png")}
               style={styles.avatarImage}
             />
-            <Text style={styles.avatarText}>Hello codewithlari</Text>
+            <Text style={styles.avatarText}>{userData?.user?.email}</Text>
           </View>
         </View>
         <View style={styles.headerRight}>
@@ -55,7 +60,7 @@ export const ListHeader = () => {
             </Pressable>
           </Link>
           <TouchableOpacity
-            // onPress={handleSignOut}
+            onPress={() => handleLogout()}
             style={styles.signOutButton}
           >
             <FontAwesome name="sign-out" size={25} color="red" />
@@ -97,6 +102,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     gap: 20,
     padding: 10,
+    paddingTop: 40,
   },
   headerTop: {
     flexDirection: "row",

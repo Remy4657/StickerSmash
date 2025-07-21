@@ -1,14 +1,22 @@
 import { Platform, StyleSheet, View } from "react-native";
 
 import { HelloWave } from "@/components/HelloWave";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 
 /**  component */
 import { ListHeader } from "@/components/list-header";
+import { useAuth } from "@/providers/auth-provider";
+import { Redirect } from "expo-router";
 
 export default function HomeScreen() {
+  const { setUserData, userData } = useAuth();
+
+  if (!userData) {
+    return <Redirect href="/" />;
+  }
+  //   const { userData } = useAuth();
+  //   console.log("[] userData: ", userData);
   return (
     <View>
       <ListHeader />

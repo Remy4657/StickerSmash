@@ -13,6 +13,8 @@ import * as zod from "zod";
 
 /**import component */
 import { login } from "@/api/api";
+import { useAuth } from "@/providers/auth-provider";
+import { useNavigation } from "@react-navigation/native";
 import { Toast } from "react-native-toast-notifications";
 const authSchema = zod.object({
   email: zod.string().email({ message: "Invalid email address" }),
@@ -22,7 +24,10 @@ const authSchema = zod.object({
 });
 
 export default function Auth() {
+  const navigation = useNavigation();
+
   const router = useRouter();
+  const { setUserData, userData } = useAuth();
 
   //const { session } = useAuth();
 
@@ -31,8 +36,8 @@ export default function Auth() {
   const { control, handleSubmit, formState } = useForm({
     resolver: zodResolver(authSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: "admin@gmail.com",
+      password: "123456789Kha@",
     },
   });
 
@@ -40,13 +45,14 @@ export default function Auth() {
     try {
       console.log(process.env.EXPO_PUBLIC_BASE_URL);
       const res = await login({
-        username: data.email,
+        email: data.email,
         password: data.password,
       });
       // const findPlatform = Platform.OS === "android" ? "10.0.2.2" : "localhost";
 
       console.log("res: ", res);
-      if (res.EC == 0) {
+      setUserData(res.data);
+      if (!res.data) {
         Toast.show("Invalid username or password", {
           type: "error",
         });
@@ -54,14 +60,14 @@ export default function Auth() {
         Toast.show("Signed in successfully", {
           type: "success",
         });
-        router.navigate("/(tabs)");
+        router.replace("/(tabs)/home");
       }
     } catch (error) {
       console.log("error: ", error);
     }
   };
 
-  const signUp = async (data: zod.infer<typeof authSchema>) => {
+  const handleSignUp = async () => {
     //const { error } = await supabase.auth.signUp(data);
     // if (error) {
     //   alert(error.message);
@@ -72,6 +78,7 @@ export default function Auth() {
     //     duration: 1500,
     //   });
     // }
+    router.push("/signup");
   };
 
   return (
@@ -143,7 +150,7 @@ export default function Auth() {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.button, styles.signUpButton]}
-          onPress={handleSubmit(signUp)}
+          onPress={() => handleSignUp()}
           disabled={formState.isSubmitting}
         >
           <Text style={styles.buttonText}>Sign Up</Text>

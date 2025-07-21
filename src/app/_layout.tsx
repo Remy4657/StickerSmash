@@ -37,7 +37,7 @@ export default function RootLayout() {
               backgroundColor: "red",
               padding: 16,
               borderRadius: 8,
-              marginTop: 10,
+              marginTop: 20,
             }}
           >
             <Text style={{ color: "white", fontSize: 16 }}>

@@ -7,39 +7,43 @@ import {
 } from "react";
 
 /**import component */
-import { getMe } from "@/api/api";
-
+import { getMe, login } from "@/api/api";
+import { boolean } from "zod";
+type UserData = {
+  username: string;
+  email: string;
+  role: string | null;
+} | null;
 type AuthData = {
   userData: any;
   isLoading: boolean;
+  setUserData: (value: any) => void;
+  logOut: () => void;
 };
 
 const AuthContext = createContext<AuthData>({
   userData: null,
   isLoading: false,
+  setUserData: () => boolean,
+  logOut: () => Promise.resolve(),
 });
 
 export default function AuthProvider({ children }: PropsWithChildren) {
-  const [userData, setUserData] = useState<{
-    username: string;
-    email: string;
-    role: string | null;
-  } | null>(null);
+  const [userData, setUserData] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  //const { data, error } = useGetMe();
-  // console.log("data: ", data);
-  // console.log("error: ", error);
-  // const { data, error } = useGetProductsAndCategories();
   const handleGetMe = async () => {
     try {
       const res = await getMe();
-      console.log("res me: ", res.data);
-      console.log("email: ", res.data?.DT?.payload?.userRole?.email);
+      console.log("res me: ", res);
+      setUserData(res);
     } catch (error) {
       console.log("error: ", error);
     }
     //setUserData({...userData, res.data.DT.payload.userRole.email})
+  };
+  const logOut = () => {
+    setUserData(null);
   };
 
   useEffect(() => {
@@ -47,7 +51,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ userData, isLoading }}>
+    <AuthContext.Provider value={{ userData, isLoading, setUserData, logOut }}>
       {children}
     </AuthContext.Provider>
   );

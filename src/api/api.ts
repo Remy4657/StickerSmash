@@ -2,7 +2,6 @@ import axios from "@/instance/axios";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 /** import component */
-import { ResponseAPI } from "@/types/api";
 
 const fetchProducts = async () => {
   const res = await axios.get(
@@ -18,16 +17,16 @@ type LoginData = {
   username: string;
   password: string;
 };
-export const login = async (data: LoginData) => {
-  const res = await axios.post<ResponseAPI>(
-    `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/user/login`,
+export const login = async (data: any) => {
+  const res = await axios.post<any>(
+    `${process.env.EXPO_PUBLIC_BASE_URL}/api/auth/login`,
     data
   );
   return res;
 };
 export const getMe = async () => {
   const res = await axios.get(
-    `${process.env.EXPO_PUBLIC_BASE_URL}/api/v1/refresh`
+    `${process.env.EXPO_PUBLIC_BASE_URL}/api/auth/me2`
   );
   return res;
 };
