@@ -45,7 +45,7 @@ export const fakeApi = {
   // Lấy tất cả bài tập
   getTodos: async (): Promise<IExercise[]> => {
     try {
-      const res = await axios.get("http://localhost:3000/api/todos");
+      const res = await axios.get("http://192.168.30.107:3000/api/todos");
       console.log("res: ", res.data);
       return res.data; // Trả về dữ liệu bài tập
     } catch (error) {
@@ -58,7 +58,7 @@ export const fakeApi = {
     isDone: boolean
   ): Promise<IExercise[]> => {
     try {
-      const res = await axios.post("http://localhost:3000/api/todos", {
+      const res = await axios.post("http://192.168.30.107:3000/api/todos", {
         title: newExerciseTitle,
         isDone,
       });
@@ -77,10 +77,13 @@ export const fakeApi = {
     isDone: boolean
   ): Promise<any> => {
     try {
-      const res = await axios.put(`http://localhost:3000/api/todos/${_id}`, {
-        title: title,
-        isDone: isDone,
-      });
+      const res = await axios.put(
+        `http://192.168.30.107:3000/api/todos/${_id}`,
+        {
+          title: title,
+          isDone: isDone,
+        }
+      );
       console.log("_id: ", _id);
       console.log("res: ", res);
       console.log("title: ", title);

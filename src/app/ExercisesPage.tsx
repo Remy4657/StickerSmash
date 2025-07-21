@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 import {
@@ -10,29 +9,17 @@ import {
   View,
 } from "react-native";
 import Exercise from "./Exercise";
-import { fakeApi, IExercise, UpdateExercisePayload } from "./fakeApi";
+import { IExercise, UpdateExercisePayload, fakeApi } from "./fakeApi";
 
 const ExercisesPage = () => {
   const [newExerciseTitle, setNewExerciseTitle] = useState("");
-  const checkAsyncStorage = async () => {
-    try {
-      const allKeys = await AsyncStorage.getAllKeys();
-      const allData = await AsyncStorage.multiGet(allKeys);
-      console.log(
-        "Tất cả dữ liệu trong AsyncStorage:",
-        JSON.parse(allData[0][1])
-      );
-    } catch (error) {
-      console.error("Lỗi khi kiểm tra AsyncStorage:", error);
-    }
-  };
+
   const { data: fetchedExercises } = useQuery({
     queryKey: ["exercises"],
     queryFn: () => fakeApi.getTodos(),
     staleTime: Infinity,
     cacheTime: Infinity,
-  });
-  console.log("fetchedExercises: ", fetchedExercises);
+  } as any);
   const updateLocalExerciseList = (
     _id: string,
     isDone: boolean,
@@ -62,15 +49,19 @@ const ExercisesPage = () => {
 
   const updateMutation = useMutation({
     mutationKey: ["exercises"],
-    mutationFn: async (payload: UpdateExercisePayload) =>
-      fakeApi.updateExerciseStatus(payload._id, payload.title, payload.isDone),
+    mutationFn: async (payload: UpdateExercisePayload) => (
+      console.log("mutationFn payload: ", payload),
+      fakeApi.updateExerciseStatus(payload._id, payload.title, payload.isDone)
+    ),
 
     onSuccess(data) {
-      console.log("data: ", data);
+      console.log("onSuccess data: ", data);
       updateLocalExerciseList(data.data._id, data.data.isDone, false);
     },
     onMutate: async (payload: UpdateExercisePayload) => {
-      await queryClient.cancelQueries(["exercises"]);
+      console.log("onMutate payload: ", payload);
+
+      await queryClient.cancelQueries(["exercises"] as any);
       updateLocalExerciseList(payload._id, payload.isDone, true);
     },
   });
@@ -85,34 +76,48 @@ const ExercisesPage = () => {
       fakeApi.addTodos(payload.title, false)
     ),
 
-    onSuccess(data: any) {
+    onSuccess(data: any, _variables: any, context: any) {
       console.log("onSuccess data", data);
+      const realExercise = data;
+      const tempId = context?.tempId;
       // Khi thêm thành công trên server, cập nhật isNotSynced = false
       queryClient.setQueryData<any[]>(["exercises"], (exercisesList) => {
         return exercisesList?.map((exercise) => {
-          // if (exercise._id === data._id) {
-          return { ...exercise, isNotSynced: false };
-          // }
-          //return exercise;
+          if (exercise._id === tempId) {
+            return { ...realExercise, isNotSynced: false };
+          }
+          return exercise;
         });
       });
     },
     onMutate: async (payload: any) => {
       console.log("onMutate payload: ", payload);
-      await queryClient.cancelQueries(["exercises"]);
-      // Tạo bài tập tạm thời với isNotSynced = true
+      await queryClient.cancelQueries(["exercises"] as any);
+      const tempId = `temp-${Date.now()}`; // tạo id tạm
       const tempExercise: any = {
-        //_id: payload._id,
+        _id: tempId,
         title: payload.title,
         isDone: false,
         isNotSynced: true,
       };
-
       // Thêm vào danh sách local ngay lập tức
       addLocalExercise(tempExercise);
+      return { tempId };
+    },
+    onSettled(data: any, _error: any, _variables: any, context: any) {
+      if (data && context?.tempId) {
+        const realExercise = data;
+        const tempId = context.tempId;
 
-      // // Trả về exercise tạm thời để rollback nếu có lỗi
-      // return { tempExercise };
+        queryClient.setQueryData<any[]>(["exercises"], (exercisesList) => {
+          return exercisesList?.map((exercise) => {
+            if (exercise._id === tempId) {
+              return { ...realExercise, isNotSynced: false };
+            }
+            return exercise;
+          });
+        });
+      }
     },
   });
 
@@ -129,12 +134,13 @@ const ExercisesPage = () => {
         />
         <Button
           title="Add"
-          onPress={() =>
+          onPress={() => {
             addMutation.mutate({
               title: newExerciseTitle,
               _id: Math.random().toString(36).substring(2, 9),
-            })
-          }
+            });
+            setNewExerciseTitle("");
+          }}
         />
       </View>
       <ScrollView>
