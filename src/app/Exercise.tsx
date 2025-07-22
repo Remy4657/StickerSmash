@@ -1,29 +1,45 @@
+import AntDesign from "@expo/vector-icons/AntDesign";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Icon from "react-native-vector-icons/Fontisto";
 import { IExercise } from "./fakeApi";
 interface ExerciseProps {
   exercise: IExercise;
   onButtonPress: () => void;
+  onDeletePress: () => void;
 }
 
-const Exercise = ({ exercise, onButtonPress }: ExerciseProps) => {
+const Exercise = ({
+  exercise,
+  onButtonPress,
+  onDeletePress,
+}: ExerciseProps) => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        onPress={onButtonPress}
-        style={[
-          styles.button,
-          {
-            backgroundColor: exercise.isDone ? "#4caf50" : "#e0e0e0",
-          },
-        ]}
-      >
-        <Icon color={exercise.isDone ? "#fff" : "#000"} name="check" />
+      <View style={styles.container}>
+        <TouchableOpacity
+          onPress={onButtonPress}
+          style={[
+            styles.button,
+            {
+              backgroundColor: exercise.isDone ? "#4caf50" : "#e0e0e0",
+            },
+          ]}
+        >
+          <AntDesign
+            name="check"
+            size={24}
+            color={exercise.isDone ? "#fff" : "#000"}
+          />
+        </TouchableOpacity>
+
+        <Text style={styles.text}>
+          {exercise.title} - {exercise?.isNotSynced ? "not synced" : "synced"}
+        </Text>
+      </View>
+
+      <TouchableOpacity onPress={onDeletePress}>
+        <AntDesign name="delete" size={24} color="black" />
       </TouchableOpacity>
-      <Text style={styles.text}>
-        {exercise.title} - {exercise?.isNotSynced ? "not synced" : "synced"}
-      </Text>
     </View>
   );
 };
@@ -31,11 +47,12 @@ const Exercise = ({ exercise, onButtonPress }: ExerciseProps) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#ffffff",
-    padding: 16,
-    marginTop: 16,
+    padding: 4,
+    marginTop: 8,
     borderRadius: 6,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
   },
   button: {
     height: 48,

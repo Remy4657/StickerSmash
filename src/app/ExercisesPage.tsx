@@ -12,6 +12,8 @@ import Exercise from "./Exercise";
 import { IExercise, UpdateExercisePayload, fakeApi } from "./fakeApi";
 
 const ExercisesPage = () => {
+  const queryClient = useQueryClient();
+
   const [newExerciseTitle, setNewExerciseTitle] = useState("");
 
   const { data: fetchedExercises } = useQuery({
@@ -20,6 +22,7 @@ const ExercisesPage = () => {
     staleTime: Infinity,
     cacheTime: Infinity,
   } as any);
+
   const updateLocalExerciseList = (
     _id: string,
     isDone: boolean,
@@ -44,23 +47,25 @@ const ExercisesPage = () => {
       return [...(exercisesList || []), newExercise];
     });
   };
-
-  const queryClient = useQueryClient();
+  const removeExerciseFromLocalList = (_id: string) => {
+    queryClient.setQueryData<IExercise[]>(["exercises"], (exercisesList) => {
+      return exercisesList?.filter((exercise) => exercise._id !== _id);
+    });
+  };
 
   const updateMutation = useMutation({
     mutationKey: ["exercises"],
     mutationFn: async (payload: UpdateExercisePayload) => (
-      console.log("mutationFn payload: ", payload),
+      console.log("[update] mutationFn payload: ", payload),
       fakeApi.updateExerciseStatus(payload._id, payload.title, payload.isDone)
     ),
 
     onSuccess(data) {
-      console.log("onSuccess data: ", data);
+      console.log("[update] onSuccess data: ", data.data);
       updateLocalExerciseList(data.data._id, data.data.isDone, false);
     },
     onMutate: async (payload: UpdateExercisePayload) => {
-      console.log("onMutate payload: ", payload);
-
+      console.log("[update] onMutate payload: ", payload);
       await queryClient.cancelQueries(["exercises"] as any);
       updateLocalExerciseList(payload._id, payload.isDone, true);
     },
@@ -71,13 +76,9 @@ const ExercisesPage = () => {
   // Mutation để thêm todo mới
   const addMutation = useMutation({
     mutationKey: ["exercises"],
-    mutationFn: async (payload: any) => (
-      console.log("payload mutationFn: ", payload),
-      fakeApi.addTodos(payload.title, false)
-    ),
+    mutationFn: async (payload: any) => fakeApi.addTodos(payload.title, false),
 
     onSuccess(data: any, _variables: any, context: any) {
-      console.log("onSuccess data", data);
       const realExercise = data;
       const tempId = context?.tempId;
       // Khi thêm thành công trên server, cập nhật isNotSynced = false
@@ -91,7 +92,6 @@ const ExercisesPage = () => {
       });
     },
     onMutate: async (payload: any) => {
-      console.log("onMutate payload: ", payload);
       await queryClient.cancelQueries(["exercises"] as any);
       const tempId = `temp-${Date.now()}`; // tạo id tạm
       const tempExercise: any = {
@@ -118,6 +118,16 @@ const ExercisesPage = () => {
           });
         });
       }
+    },
+  });
+
+  // Mutation để delete
+  const deleteMutation = useMutation({
+    mutationKey: ["exercises"],
+    mutationFn: async (payload: any) => fakeApi.deleteTodos(payload._id),
+    onMutate: async (payload: any) => {
+      await queryClient.cancelQueries(["exercises"] as any);
+      removeExerciseFromLocalList(payload._id);
     },
   });
 
@@ -153,6 +163,7 @@ const ExercisesPage = () => {
                 isDone: !exercise.isDone,
               })
             }
+            onDeletePress={() => deleteMutation.mutate({ _id: exercise._id })}
             key={exercise._id}
             exercise={exercise}
           />

@@ -46,7 +46,6 @@ export const fakeApi = {
   getTodos: async (): Promise<IExercise[]> => {
     try {
       const res = await axios.get("http://192.168.30.107:3000/api/todos");
-      console.log("res: ", res.data);
       return res.data; // Trả về dữ liệu bài tập
     } catch (error) {
       console.error("Error fetching todos:", error);
@@ -62,10 +61,9 @@ export const fakeApi = {
         title: newExerciseTitle,
         isDone,
       });
-      console.log("res add: ", res);
-      return res?.data; // Trả về dữ liệu bài tập
+      return res?.data;
     } catch (error) {
-      console.error("Error fetching todos:", error);
+      console.error("Error add todos:", error);
       throw error; // Ném lỗi nếu không lấy được dữ liệu
     }
   },
@@ -84,13 +82,22 @@ export const fakeApi = {
           isDone: isDone,
         }
       );
-      console.log("_id: ", _id);
-      console.log("res: ", res);
-      console.log("title: ", title);
       return res; // Trả về dữ liệu đã được cập nhật từ API
     } catch (error) {
       console.error("Error updating exercise status:", error);
       throw error; // Ném lỗi nếu không cập nhật được
+    }
+  },
+  deleteTodos: async (_id: string): Promise<any> => {
+    try {
+      const res = await axios.delete(
+        `http://192.168.30.107:3000/api/todos/${_id}`
+      );
+      console.log("res delete: ", res);
+      return;
+    } catch (error) {
+      console.error("Error delete todos:", error);
+      throw error; // Ném lỗi nếu không lấy được dữ liệu
     }
   },
 };
