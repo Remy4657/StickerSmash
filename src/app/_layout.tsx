@@ -13,7 +13,6 @@ const persister = createAsyncStoragePersister({
   storage: AsyncStorage,
   throttleTime: 3000,
 });
-
 const App = () => {
   const [isOnline, setIsOnline] = useState(true);
 

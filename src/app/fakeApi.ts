@@ -2,8 +2,8 @@ import axios from "axios";
 
 export interface IExercise {
   _id: string;
+  id_temp: string;
   title: string;
-  isNotSynced?: boolean;
   isDone: boolean;
 }
 
@@ -13,58 +13,31 @@ export interface UpdateExercisePayload {
   isDone: boolean;
 }
 
-let exercises: IExercise[] = [
-  {
-    _id: "1",
-    title: "Push ups",
-    isDone: true,
-  },
-  {
-    _id: "2",
-    title: "Pull ups",
-    isDone: false,
-  },
-  {
-    _id: "3",
-    title: "Squats",
-    isDone: false,
-  },
-  {
-    _id: "4",
-    title: "Lunges",
-    isDone: false,
-  },
-  {
-    _id: "5",
-    title: "Bench press",
-    isDone: false,
-  },
-];
-
 export const fakeApi = {
-  // Lấy tất cả bài tập
   getTodos: async (): Promise<IExercise[]> => {
     try {
       const res = await axios.get("http://192.168.30.107:3000/api/todos");
-      return res.data; // Trả về dữ liệu bài tập
+      return res.data;
     } catch (error) {
       console.error("Error fetching todos:", error);
-      throw error; // Ném lỗi nếu không lấy được dữ liệu
+      return [];
     }
   },
   addTodos: async (
+    id_temp: string,
     newExerciseTitle: string,
     isDone: boolean
-  ): Promise<IExercise[]> => {
+  ): Promise<IExercise> => {
     try {
       const res = await axios.post("http://192.168.30.107:3000/api/todos", {
+        id_temp,
         title: newExerciseTitle,
         isDone,
       });
-      return res?.data;
+      return res.data;
     } catch (error) {
       console.error("Error add todos:", error);
-      throw error; // Ném lỗi nếu không lấy được dữ liệu
+      return error as IExercise;
     }
   },
 
@@ -82,13 +55,13 @@ export const fakeApi = {
           isDone: isDone,
         }
       );
-      return res; // Trả về dữ liệu đã được cập nhật từ API
+      return res;
     } catch (error) {
       console.error("Error updating exercise status:", error);
-      throw error; // Ném lỗi nếu không cập nhật được
+      return;
     }
   },
-  deleteTodos: async (_id: string): Promise<any> => {
+  deleteTodos: async (_id: string): Promise<void> => {
     try {
       const res = await axios.delete(
         `http://192.168.30.107:3000/api/todos/${_id}`
@@ -97,7 +70,7 @@ export const fakeApi = {
       return;
     } catch (error) {
       console.error("Error delete todos:", error);
-      throw error; // Ném lỗi nếu không lấy được dữ liệu
+      return;
     }
   },
 };
