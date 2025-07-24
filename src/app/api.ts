@@ -1,26 +1,15 @@
 import axios from "axios";
+import { IExercise } from "../types/type";
+const APP_URL = "http://192.168.30.107:3000";
 
-export interface IExercise {
-  _id: string;
-  id_temp: string;
-  title: string;
-  isDone: boolean;
-}
-
-export interface UpdateExercisePayload {
-  _id: string;
-  title: string;
-  isDone: boolean;
-}
-
-export const fakeApi = {
+export const api = {
   getTodos: async (): Promise<IExercise[]> => {
     try {
-      const res = await axios.get("http://192.168.30.107:3000/api/todos");
+      const res = await axios.get(`${APP_URL}/api/todos`);
       return res.data;
     } catch (error) {
       console.error("Error fetching todos:", error);
-      return [];
+      throw error;
     }
   },
   addTodos: async (
@@ -29,7 +18,7 @@ export const fakeApi = {
     isDone: boolean
   ): Promise<IExercise> => {
     try {
-      const res = await axios.post("http://192.168.30.107:3000/api/todos", {
+      const res = await axios.post(`${APP_URL}/api/todos`, {
         id_temp,
         title: newExerciseTitle,
         isDone,
@@ -37,40 +26,36 @@ export const fakeApi = {
       return res.data;
     } catch (error) {
       console.error("Error add todos:", error);
-      return error as IExercise;
+      throw error;
     }
   },
 
   // Cập nhật trạng thái bài tập
-  updateExerciseStatus: async (
+  updateTodos: async (
     _id: string,
     title: string,
     isDone: boolean
   ): Promise<any> => {
     try {
-      const res = await axios.put(
-        `http://192.168.30.107:3000/api/todos/${_id}`,
-        {
-          title: title,
-          isDone: isDone,
-        }
-      );
+      const res = await axios.put(`${APP_URL}/api/todos/${_id}`, {
+        title: title,
+        isDone: isDone,
+      });
+      console.log("res: ", res);
       return res;
     } catch (error) {
       console.error("Error updating exercise status:", error);
-      return;
+      throw error;
     }
   },
   deleteTodos: async (_id: string): Promise<void> => {
     try {
-      const res = await axios.delete(
-        `http://192.168.30.107:3000/api/todos/${_id}`
-      );
+      const res = await axios.delete(`${APP_URL}/api/todos/${_id}`);
       console.log("res delete: ", res);
       return;
     } catch (error) {
       console.error("Error delete todos:", error);
-      return;
+      throw error;
     }
   },
 };

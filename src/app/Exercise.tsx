@@ -1,7 +1,7 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { IExercise } from "./fakeApi";
+import { IExercise } from "../types/type";
 interface ExerciseProps {
   exercise: IExercise;
   onButtonPress: () => void;
