@@ -1,19 +1,18 @@
+import { api } from "@/app/api";
+import { IExercise, UpdateExercisePayload } from "@/types/type";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { IExercise, UpdateExercisePayload } from "@/types/type";
-import { api } from "@/app/api";
 
-export const useExercises = (id: string) => {
+export const useExercises = (id?: string) => {
   const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState(false);
 
-  const { data: fetchedExercises } = useQuery({
+  const { data: fetchedExercises } = useQuery<IExercise[]>({
     queryKey: ["exercises"],
     queryFn: () => api.getTodos(),
     staleTime: Infinity,
     cacheTime: Infinity,
   } as any);
-
   useEffect(() => {
     if (fetchedExercises) {
       //console.log("fetchedExercises: ", fetchedExercises);
@@ -40,7 +39,12 @@ export const useExercises = (id: string) => {
   // Hàm thêm bài tập vào danh sách local
   const addLocalExercise = (newExercise: IExercise) => {
     queryClient.setQueryData<IExercise[]>(["exercises"], (exercisesList) => {
-      return [...(exercisesList || []), newExercise];
+      const updatedList = [...(exercisesList || []), newExercise];
+      updatedList.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      return updatedList;
     });
   };
   const removeExerciseFromLocalList = (_id: string) => {
@@ -51,8 +55,7 @@ export const useExercises = (id: string) => {
 
   const updateMutation = useMutation({
     scope: {
-      id: `update-ex + ${Math.random().toString(36).slice(2, 11)}`,
-      //id: "u",
+      id: "constant",
     },
     mutationKey: ["exercises"],
     mutationFn: async (payload: UpdateExercisePayload) => (
@@ -61,7 +64,6 @@ export const useExercises = (id: string) => {
     ),
 
     onSuccess(data) {
-      console.log("[update] onSuccess data: ", data.data);
       updateLocalExerciseList(data.data._id, data.data.isDone, false);
     },
     onMutate: async (payload: UpdateExercisePayload) => {
@@ -73,8 +75,7 @@ export const useExercises = (id: string) => {
   // Mutation để thêm todo mới
   const addMutation = useMutation({
     scope: {
-      id: `update-ex + ${Math.random().toString(36).slice(2, 11)}`,
-      //id: "a",
+      id: "constant",
     },
     mutationKey: ["exercises"],
     mutationFn: async (payload: any) => {
@@ -100,7 +101,6 @@ export const useExercises = (id: string) => {
     },
     onMutate: async (payload: any) => {
       console.log("[add onMutate]");
-
       await queryClient.cancelQueries(["exercises"] as any);
       const tempId = `temp-${Date.now()}`; // tạo id tạm
       const tempExercise: any = {
@@ -108,6 +108,7 @@ export const useExercises = (id: string) => {
         title: payload.title,
         isDone: false,
         isNotSynced: true,
+        createdAt: new Date().toISOString(),
       };
       // Thêm vào danh sách local ngay lập tức
       addLocalExercise(tempExercise);
@@ -120,7 +121,8 @@ export const useExercises = (id: string) => {
   const deleteMutation = useMutation({
     scope: {
       //id: `update-ex + ${Math.random().toString(36).slice(2, 11)}`,
-      id: "2",
+
+      id: "constant",
     },
     mutationKey: ["exercises"],
     mutationFn: async (payload: any) => api.deleteTodos(payload._id),

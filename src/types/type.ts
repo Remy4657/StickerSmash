@@ -3,6 +3,8 @@ export interface IExercise {
   id_temp: string;
   title: string;
   isDone: boolean;
+  createdAt: string;
+  updatedAt: string;
   isNotSynced?: boolean;
 }
 
