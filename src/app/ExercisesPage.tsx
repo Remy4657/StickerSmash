@@ -14,8 +14,19 @@ import { useExercises } from "@/components/ExercisesPage/useExercises";
 
 const ExercisesPage = () => {
   const [newExerciseTitle, setNewExerciseTitle] = useState("");
+  const [idItem, setIdItem] = useState(undefined);
+
   const { exercises, addMutation, updateMutation, deleteMutation, isAdding } =
-    useExercises();
+    useExercises(idItem);
+
+  const handleUpdate = (exercise: any) => {
+    setIdItem(exercise._id);
+    updateMutation.mutate({
+      _id: exercise._id,
+      title: exercise.title,
+      isDone: !exercise.isDone,
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -49,18 +60,7 @@ const ExercisesPage = () => {
         {exercises?.map((exercise) => (
           <Exercise
             onButtonPress={() => {
-              // const {
-              //   exercises,
-              //   addMutation,
-              //   updateMutation,
-              //   deleteMutation,
-              //   isAdding,
-              // } = useExercises(exercise._id);
-              updateMutation.mutate({
-                _id: exercise._id,
-                title: exercise.title,
-                isDone: !exercise.isDone,
-              });
+              handleUpdate(exercise);
             }}
             onDeletePress={() => {
               // const {

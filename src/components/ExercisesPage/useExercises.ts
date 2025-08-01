@@ -4,18 +4,20 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 export const useExercises = (id?: string) => {
+  console.log("id item update: ", id, !id);
   const queryClient = useQueryClient();
   const [isAdding, setIsAdding] = useState(false);
 
   const { data: fetchedExercises } = useQuery<IExercise[]>({
-    queryKey: ["exercises"],
+    queryKey: ["exercises-fetch"],
     queryFn: () => api.getTodos(),
     staleTime: Infinity,
     cacheTime: Infinity,
+    //enabled: !id || !!id,
   } as any);
   useEffect(() => {
     if (fetchedExercises) {
-      //console.log("fetchedExercises: ", fetchedExercises);
+      console.log("fetchedExercises: ", fetchedExercises);
     }
   }, [fetchedExercises]);
   const updateLocalExerciseList = (
@@ -23,41 +25,52 @@ export const useExercises = (id?: string) => {
     isDone: boolean,
     isNotSynced?: boolean
   ) => {
-    queryClient.setQueryData<IExercise[]>(["exercises"], (exercisesList) => {
-      return exercisesList?.map((exercise) => {
-        if (exercise._id === _id || exercise.id_temp === _id) {
-          return {
-            ...exercise,
-            isDone,
-            isNotSynced,
-          };
-        }
-        return exercise;
-      });
-    });
+    queryClient.setQueryData<IExercise[]>(
+      ["exercises-fetch"],
+      (exercisesList) => {
+        return exercisesList?.map((exercise) => {
+          if (exercise._id === _id || exercise.id_temp === _id) {
+            return {
+              ...exercise,
+              isDone,
+              isNotSynced,
+            };
+          }
+          return exercise;
+        });
+      }
+    );
   };
   // Hàm thêm bài tập vào danh sách local
   const addLocalExercise = (newExercise: IExercise) => {
-    queryClient.setQueryData<IExercise[]>(["exercises"], (exercisesList) => {
-      const updatedList = [...(exercisesList || []), newExercise];
-      updatedList.sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-      return updatedList;
-    });
+    queryClient.setQueryData<IExercise[]>(
+      ["exercises-fetch"],
+      (exercisesList) => {
+        const updatedList = [...(exercisesList || []), newExercise];
+        updatedList.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        return updatedList;
+      }
+    );
   };
   const removeExerciseFromLocalList = (_id: string) => {
-    queryClient.setQueryData<IExercise[]>(["exercises"], (exercisesList) => {
-      return exercisesList?.filter((exercise) => exercise._id !== _id);
-    });
+    queryClient.setQueryData<IExercise[]>(
+      ["exercises-fetch"],
+      (exercisesList) => {
+        return exercisesList?.filter((exercise) => exercise._id !== _id);
+      }
+    );
   };
 
   const updateMutation = useMutation({
     scope: {
-      id: "constant",
+      //id: `update-ex + ${Math.random().toString(36).slice(2, 11)}`,
+      id: `${id}`,
+      //id: "constant",
     },
-    mutationKey: ["exercises"],
+    mutationKey: ["exercises-update"],
     mutationFn: async (payload: UpdateExercisePayload) => (
       console.log("[update] mutationFn payload: ", payload),
       api.updateTodos(payload._id, payload.title, payload.isDone)
@@ -68,7 +81,7 @@ export const useExercises = (id?: string) => {
     },
     onMutate: async (payload: UpdateExercisePayload) => {
       console.log("[update] onMutate payload: ", payload);
-      await queryClient.cancelQueries(["exercises"] as any);
+      // await queryClient.cancelQueries(["exercises"] as any);
       updateLocalExerciseList(payload._id, payload.isDone, true);
     },
   });
@@ -77,7 +90,7 @@ export const useExercises = (id?: string) => {
     scope: {
       id: "constant",
     },
-    mutationKey: ["exercises"],
+    mutationKey: ["exercises-add"],
     mutationFn: async (payload: any) => {
       console.log("[add mutationFn] payload: ", payload);
       return api.addTodos(payload._id, payload.title, false);
@@ -89,7 +102,7 @@ export const useExercises = (id?: string) => {
       const realExercise = data;
 
       // Khi thêm thành công trên server, cập nhật isNotSynced = false
-      queryClient.setQueryData<any[]>(["exercises"], (exercisesList) => {
+      queryClient.setQueryData<any[]>(["exercises-fetch"], (exercisesList) => {
         return exercisesList?.map((exercise) => {
           if (exercise._id === tempId) {
             return { ...realExercise, isNotSynced: false };
@@ -97,11 +110,11 @@ export const useExercises = (id?: string) => {
           return exercise;
         });
       });
-      queryClient.refetchQueries(["exercises"] as any);
+      queryClient.refetchQueries(["exercises-fetch"] as any);
     },
     onMutate: async (payload: any) => {
       console.log("[add onMutate]");
-      await queryClient.cancelQueries(["exercises"] as any);
+      // await queryClient.cancelQueries(["exercises"] as any);
       const tempId = `temp-${Date.now()}`; // tạo id tạm
       const tempExercise: any = {
         _id: payload._id,
@@ -124,10 +137,10 @@ export const useExercises = (id?: string) => {
 
       id: "constant",
     },
-    mutationKey: ["exercises"],
+    mutationKey: ["exercises-delete"],
     mutationFn: async (payload: any) => api.deleteTodos(payload._id),
     onMutate: async (payload: any) => {
-      await queryClient.cancelQueries(["exercises"] as any);
+      // await queryClient.cancelQueries(["exercises"] as any);
       removeExerciseFromLocalList(payload._id);
     },
   });
